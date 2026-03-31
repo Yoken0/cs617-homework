@@ -1,0 +1,432 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>CS617 Assignment 3 — Boston Crime Data Story</title>
+        <script src="https://cdn.plot.ly/plotly-2.35.0.min.js"></script>
+        <style>
+            * {
+                margin: 0;
+                padding: 0;
+                box-sizing: border-box;
+            }
+            body {
+                font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+                background: #0d1117;
+                color: #c9d1d9;
+                line-height: 1.6;
+            }
+            .container {
+                max-width: 1100px;
+                margin: 0 auto;
+                padding: 30px 20px;
+            }
+            header {
+                text-align: center;
+                margin-bottom: 40px;
+                padding: 30px 0;
+                border-bottom: 2px solid #21262d;
+            }
+            h1 {
+                font-size: 2.2em;
+                color: #f0f6fc;
+                margin-bottom: 8px;
+            }
+            h1 span {
+                color: #58a6ff;
+            }
+            .subtitle {
+                font-size: 1.1em;
+                color: #8b949e;
+                max-width: 700px;
+                margin: 0 auto;
+            }
+            .badge {
+                display: inline-block;
+                background: #1f6feb;
+                color: #fff;
+                padding: 4px 12px;
+                border-radius: 20px;
+                font-size: 0.8em;
+                margin-top: 12px;
+            }
+            .story-section {
+                background: #161b22;
+                border: 1px solid #21262d;
+                border-radius: 12px;
+                padding: 25px 30px;
+                margin-bottom: 30px;
+            }
+            .story-section h2 {
+                font-size: 1.4em;
+                color: #f0f6fc;
+                margin-bottom: 8px;
+            }
+            .story-section h2 .chart-num {
+                color: #58a6ff;
+                font-size: 0.85em;
+            }
+            .story-section p {
+                color: #8b949e;
+                margin-bottom: 15px;
+                font-size: 0.95em;
+            }
+            .chart-container {
+                background: #0d1117;
+                border-radius: 8px;
+                padding: 10px;
+                margin-top: 10px;
+            }
+            .insight-box {
+                background: #1c2128;
+                border-left: 4px solid #58a6ff;
+                padding: 15px 20px;
+                border-radius: 0 8px 8px 0;
+                margin-top: 15px;
+            }
+            .insight-box strong {
+                color: #58a6ff;
+            }
+            .connection {
+                background: linear-gradient(135deg, #161b22, #1c2128);
+                border: 2px solid #1f6feb;
+                border-radius: 12px;
+                padding: 25px 30px;
+                margin: 30px 0;
+                text-align: center;
+            }
+            .connection h2 {
+                color: #58a6ff;
+                margin-bottom: 10px;
+            }
+            .connection p {
+                color: #c9d1d9;
+                max-width: 700px;
+                margin: 0 auto;
+            }
+            footer {
+                text-align: center;
+                padding: 25px 0;
+                border-top: 1px solid #21262d;
+                color: #484f58;
+                font-size: 0.85em;
+                margin-top: 20px;
+            }
+            footer a {
+                color: #58a6ff;
+                text-decoration: none;
+            }
+        </style>
+    </head>
+    <body>
+        <div class="container">
+            <header>
+                <h1>
+                    Boston Crime:
+                    <span>When Danger Peaks &amp; Where It Lurks</span>
+                </h1>
+                <p class="subtitle">
+                    An interactive data story exploring temporal rhythms and
+                    spatial patterns in Boston crime incidents, using the
+                    Analyze Boston Crime Incident Reports API.
+                </p>
+                <span class="badge">CS617 Spring 2026 — Assignment 3</span>
+            </header>
+
+            <!-- CHART 1: HEATMAP -->
+            <div class="story-section">
+                <h2>
+                    <span class="chart-num">CHART 1 /</span> When Does Crime
+                    Strike?
+                </h2>
+                <p>
+                    This heatmap reveals the pulse of crime across the week.
+                    Each cell encodes the number of incidents at a given
+                    day-and-hour combination. Darker colors mean more danger.
+                    Hover over any cell to see the exact count.
+                </p>
+                <div class="chart-container">
+                    <div id="heatmap"></div>
+                </div>
+                <div class="insight-box">
+                    <strong>Key Insight:</strong> Crime peaks between
+                    <strong>12 PM – midnight</strong>, especially on
+                    <strong>Friday and Saturday</strong> evenings. The 2–5 AM
+                    window is consistently quiet across every day of the week.
+                </div>
+            </div>
+
+            <!-- CHART 2: GROUPED BAR -->
+            <div class="story-section">
+                <h2>
+                    <span class="chart-num">CHART 2 /</span> What Crimes Hit
+                    Which Districts?
+                </h2>
+                <p>
+                    Not all neighborhoods face the same threats. This grouped
+                    bar chart breaks down the top 5 offense categories across
+                    Boston's police districts, revealing which areas are hit
+                    hardest and by what type of crime.
+                </p>
+                <div class="chart-container">
+                    <div id="barchart"></div>
+                </div>
+                <div class="insight-box">
+                    <strong>Key Insight:</strong>
+                    <strong>Larceny</strong> dominates nearly every district,
+                    but districts like <strong>B2</strong> (Roxbury) and
+                    <strong>B3</strong> (Mattapan) show elevated
+                    <strong>assault</strong> and
+                    <strong>drug violation</strong> rates compared to downtown
+                    districts like A1 and D4.
+                </div>
+            </div>
+
+            <!-- CONNECTION -->
+            <div class="connection">
+                <h2>How These Charts Connect</h2>
+                <p>
+                    <strong>Chart 1</strong> tells us <em>when</em> to be alert
+                    — Friday and Saturday evenings are peak danger windows.
+                    <strong>Chart 2</strong> tells us <em>where</em> and
+                    <em>what</em> — certain districts face disproportionate
+                    levels of specific crimes. Together, they paint a picture of
+                    <strong>targeted resource allocation</strong>: deploy more
+                    officers to high-crime districts during peak hours, and
+                    tailor response teams to the dominant offense types in each
+                    area.
+                </p>
+            </div>
+
+            <footer>
+                Data Source:
+                <a href="https://data.boston.gov" target="_blank"
+                    >Analyze Boston</a
+                >
+                Crime Incident Reports &nbsp;|&nbsp; Resource ID:
+                b973d8cb-eeb2-4e7e-99da-c92938efc9c0 &nbsp;|&nbsp; CS617 Spring
+                2026
+            </footer>
+        </div>
+
+        <script>
+            // ============================================================
+            // DATA — Aggregated from Colab notebook (CS617_A3_DataPrep.ipynb)
+            // Source: Boston Crime Incident Reports via Analyze Boston SQL API
+            // ============================================================
+
+            // --- CHART 1: Heatmap Data (Day of Week × Hour) ---
+            const heatmapData = {
+                days: [
+                    "Monday",
+                    "Tuesday",
+                    "Wednesday",
+                    "Thursday",
+                    "Friday",
+                    "Saturday",
+                    "Sunday",
+                ],
+                hours: [
+                    0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16,
+                    17, 18, 19, 20, 21, 22, 23,
+                ],
+                values: [
+                    [
+                        380, 88, 100, 57, 44, 57, 72, 122, 170, 215, 226, 241,
+                        261, 232, 215, 255, 267, 266, 249, 197, 212, 177, 124,
+                        88,
+                    ],
+                    [
+                        338, 87, 72, 46, 36, 48, 74, 143, 222, 242, 232, 284,
+                        300, 249, 216, 247, 291, 313, 271, 220, 219, 202, 154,
+                        118,
+                    ],
+                    [
+                        372, 81, 53, 45, 32, 41, 58, 119, 196, 229, 278, 225,
+                        285, 232, 230, 224, 299, 289, 275, 209, 218, 161, 142,
+                        101,
+                    ],
+                    [
+                        336, 87, 69, 54, 29, 47, 52, 112, 160, 206, 217, 230,
+                        283, 198, 204, 186, 251, 230, 263, 230, 180, 181, 153,
+                        100,
+                    ],
+                    [
+                        373, 116, 91, 42, 41, 55, 62, 110, 171, 188, 199, 239,
+                        257, 225, 208, 242, 232, 316, 237, 205, 163, 196, 155,
+                        131,
+                    ],
+                    [
+                        369, 144, 133, 85, 56, 63, 65, 97, 177, 196, 212, 235,
+                        281, 229, 234, 213, 232, 248, 229, 214, 198, 218, 181,
+                        163,
+                    ],
+                    [
+                        332, 165, 158, 115, 78, 54, 53, 74, 98, 148, 177, 186,
+                        207, 189, 192, 181, 251, 223, 192, 186, 177, 176, 141,
+                        130,
+                    ],
+                ],
+            };
+
+            // --- CHART 2: Grouped Bar Data ---
+            // REMOVE the extra outer { } here
+            const barData = {
+                districts: [
+                    "A1",
+                    "A15",
+                    "A7",
+                    "B2",
+                    "B3",
+                    "C11",
+                    "C6",
+                    "D14",
+                    "D4",
+                    "E13",
+                    "E18",
+                    "E5",
+                    "External",
+                ],
+                offenses: [
+                    "ASSAULT - SIMPLE",
+                    "INVESTIGATE PERSON",
+                    "M/V - LEAVING SCENE - PROPERTY DAMAGE",
+                    "SICK ASSIST",
+                    "TOWED MOTOR VEHICLE",
+                ],
+                data: {
+                    "ASSAULT - SIMPLE": [
+                        254, 14, 63, 175, 127, 157, 114, 83, 194, 59, 58, 56, 1,
+                    ],
+                    "INVESTIGATE PERSON": [
+                        314, 63, 151, 443, 306, 336, 233, 256, 382, 178, 189,
+                        176, 2,
+                    ],
+                    "M/V - LEAVING SCENE - PROPERTY DAMAGE": [
+                        153, 42, 77, 205, 178, 288, 141, 141, 180, 75, 99, 93,
+                        1,
+                    ],
+                    "SICK ASSIST": [
+                        339, 59, 166, 365, 248, 247, 191, 184, 354, 168, 121,
+                        122, 1,
+                    ],
+                    "TOWED MOTOR VEHICLE": [
+                        130, 43, 114, 136, 94, 161, 194, 140, 153, 88, 37, 28,
+                        2,
+                    ],
+                },
+            };
+
+            // Colors for bar chart
+            const barColors = [
+                "#58a6ff",
+                "#f78166",
+                "#d2a8ff",
+                "#3fb950",
+                "#f0883e",
+            ];
+
+            // ============================================================
+            // CHART 1: HEATMAP
+            // ============================================================
+            const heatmapTrace = {
+                z: heatmapData.values,
+                x: heatmapData.hours.map((h) => {
+                    const ampm = h >= 12 ? "PM" : "AM";
+                    const h12 = h === 0 ? 12 : h > 12 ? h - 12 : h;
+                    return h12 + " " + ampm;
+                }),
+                y: heatmapData.days,
+                type: "heatmap",
+                colorscale: [
+                    [0, "#0d1117"],
+                    [0.25, "#1a3a5c"],
+                    [0.5, "#1f6feb"],
+                    [0.75, "#f0883e"],
+                    [1, "#f85149"],
+                ],
+                hovertemplate:
+                    "<b>%{y}</b> at <b>%{x}</b><br>Incidents: <b>%{z}</b><extra></extra>",
+                colorbar: {
+                    title: { text: "Incidents", font: { color: "#8b949e" } },
+                    tickfont: { color: "#8b949e" },
+                    outlinewidth: 0,
+                },
+            };
+
+            const heatmapLayout = {
+                paper_bgcolor: "#0d1117",
+                plot_bgcolor: "#0d1117",
+                font: { color: "#c9d1d9", family: "Segoe UI, sans-serif" },
+                margin: { l: 90, r: 30, t: 40, b: 60 },
+                xaxis: {
+                    title: "Hour of Day",
+                    tickfont: { size: 10, color: "#8b949e" },
+                    gridcolor: "#21262d",
+                },
+                yaxis: {
+                    tickfont: { size: 11, color: "#8b949e" },
+                    autorange: "reversed",
+                },
+                height: 350,
+            };
+
+            Plotly.newPlot("heatmap", [heatmapTrace], heatmapLayout, {
+                responsive: true,
+                displayModeBar: true,
+                modeBarButtonsToRemove: ["lasso2d", "select2d"],
+            });
+
+            // ============================================================
+            // CHART 2: GROUPED BAR CHART
+            // ============================================================
+            const barTraces = barData.offenses.map((offense, i) => ({
+                x: barData.districts,
+                y: barData.data[offense],
+                name: offense,
+                type: "bar",
+                marker: { color: barColors[i], line: { width: 0 } },
+                hovertemplate:
+                    "<b>" +
+                    offense +
+                    "</b><br>District %{x}: <b>%{y}</b> incidents<extra></extra>",
+            }));
+
+            const barLayout = {
+                paper_bgcolor: "#0d1117",
+                plot_bgcolor: "#0d1117",
+                font: { color: "#c9d1d9", family: "Segoe UI, sans-serif" },
+                barmode: "group",
+                margin: { l: 60, r: 20, t: 40, b: 60 },
+                xaxis: {
+                    title: "Police District",
+                    tickfont: { size: 11, color: "#8b949e" },
+                    gridcolor: "#21262d",
+                },
+                yaxis: {
+                    title: "Number of Incidents",
+                    tickfont: { size: 10, color: "#8b949e" },
+                    gridcolor: "#21262d",
+                    gridwidth: 0.5,
+                },
+                legend: {
+                    orientation: "h",
+                    y: -0.2,
+                    x: 0.5,
+                    xanchor: "center",
+                    font: { size: 11, color: "#8b949e" },
+                },
+                height: 420,
+                bargap: 0.2,
+                bargroupgap: 0.05,
+            };
+
+            Plotly.newPlot("barchart", barTraces, barLayout, {
+                responsive: true,
+                displayModeBar: true,
+                modeBarButtonsToRemove: ["lasso2d", "select2d"],
+            });
+        </script>
+    </body>
+</html>
